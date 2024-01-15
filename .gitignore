@@ -60,3 +60,7 @@
 /drush
 /drupal.phar
 /drupal
+
+#Ignore docker compose .env
+
+.env
