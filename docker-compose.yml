@@ -59,8 +59,9 @@ services:
       CIVICRM_LANG: ${CIVICRM_LANG}
       CMS_BASE_URL: ${CMS_BASE_URL}
     labels:
-    - "traefik.http.routers.drupal.rule=Host(`${DRUPAL_HOSTNAME}`)"
-    - "traefik.http.routers.drupal.tls=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.drupal.rule=Host(`${DRUPAL_HOSTNAME}`)"
+      - "traefik.http.routers.drupal.tls=true"
     volumes:
       - drupal:/opt/drupal
     restart: always
@@ -69,7 +70,6 @@ services:
 
   db:
     image: mariadb:11.2
-    #command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MARIADB_RANDOM_ROOT_PASSWORD: "true"
       DRUPAL_DB: ${DRUPAL_DB}
@@ -82,10 +82,24 @@ services:
       - db:/var/lib/mysql
       - ./db/init:/docker-entrypoint-initdb.d
     restart: always
+    labels:
+      - "traefik.enable=false"
 
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    ports:
-      - 1025:1025
-      - 8025:8025
+  autoheal:
+    restart: always
+    image: willfarrell/autoheal:1.2.0
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=false"
+
+  # mailhog:
+  #   image: mailhog/mailhog:v1.0.1
+  #   ports:
+  #     - 1025:1025
+  #     - 8025:8025
+  #   labels:
+  #     -"traefik.enable=false"
 
