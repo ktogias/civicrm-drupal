@@ -1,0 +1,3 @@
+[[tls.certificates]] 
+   certFile = "/configuration/certs/server.crt" 
+   keyFile = "/configuration/certs/server.key"

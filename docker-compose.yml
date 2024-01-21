@@ -18,6 +18,31 @@ volumes:
 
 services:
 
+  ingress:
+    image: traefik:v2.5
+    command: 
+      - --entrypoints.web.address=:80
+      - --entrypoints.web-secure.address=:443
+      - --providers.docker
+      - --providers.file.directory=/configuration/
+      - --providers.file.watch=true
+    ports:
+      - "${INGRESS_HTTP_PORT}:80"
+      - "${INGRESS_HTTPS_PORT}:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./ingress/configuration/:/configuration/
+    labels:
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.port=${INGRESS_HTTPS_PORT}"
+      - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.redirs.entrypoints=web"
+      - "traefik.http.routers.redirs.middlewares=redirect-to-https"
+    networks:
+      default:
+        aliases: 
+        - ${DRUPAL_HOSTNAME}
+
   drupal:
     image: ktogias/civicrm-drupal:drupal10-1
     environment:
@@ -33,9 +58,9 @@ services:
       CIVICRM_DB_PASSWORD: ${CIVICRM_DB_PASSWORD}
       CIVICRM_LANG: ${CIVICRM_LANG}
       CMS_BASE_URL: ${CMS_BASE_URL}
-
-    ports:
-      - 8080:80
+    labels:
+    - "traefik.http.routers.drupal.rule=Host(`${DRUPAL_HOSTNAME}`)"
+    - "traefik.http.routers.drupal.tls=true"
     volumes:
       - drupal:/opt/drupal
     restart: always
