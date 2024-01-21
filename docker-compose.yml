@@ -19,7 +19,7 @@ volumes:
 services:
 
   drupal:
-    image: ktogias/civicrm-drupal:drupal10
+    image: ktogias/civicrm-drupal:drupal10-1
     environment:
       DRUPAL_DB: ${DRUPAL_DB}
       DRUPAL_DB_USER: ${DRUPAL_DB_USER}

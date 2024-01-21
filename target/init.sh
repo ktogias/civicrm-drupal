@@ -80,6 +80,7 @@ fi
 if [ "${skip_cv}" = false ]; then
     echo "Installing cv..."
     cd web
+    composer config --working-dir=/opt/drupal --no-plugins extra.enable-patching true
     composer config --working-dir=/opt/drupal --no-plugins allow-plugins.cweagans/composer-patches true
     composer config --working-dir=/opt/drupal --no-plugins allow-plugins.civicrm/civicrm-asset-plugin true
     composer config --working-dir=/opt/drupal --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
