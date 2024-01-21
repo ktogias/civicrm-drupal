@@ -44,7 +44,7 @@ services:
         - ${DRUPAL_HOSTNAME}
 
   drupal:
-    image: ktogias/civicrm-drupal:drupal10-1
+    image: ktogias/civicrm-drupal:drupal10-2
     environment:
       DRUPAL_DB: ${DRUPAL_DB}
       DRUPAL_DB_USER: ${DRUPAL_DB_USER}
@@ -58,6 +58,7 @@ services:
       CIVICRM_DB_PASSWORD: ${CIVICRM_DB_PASSWORD}
       CIVICRM_LANG: ${CIVICRM_LANG}
       CMS_BASE_URL: ${CMS_BASE_URL}
+      TZ: ${TIMEZONE}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.drupal.rule=Host(`${DRUPAL_HOSTNAME}`)"
@@ -78,6 +79,7 @@ services:
       CIVICRM_DB: ${CIVICRM_DB}
       CIVICRM_DB_USER: ${CIVICRM_DB_USER}
       CIVICRM_DB_PASSWORD: ${CIVICRM_DB_PASSWORD}
+      TZ: ${TIMEZONE}
     volumes:
       - db:/var/lib/mysql
       - ./db/init:/docker-entrypoint-initdb.d

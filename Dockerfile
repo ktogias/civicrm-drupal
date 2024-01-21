@@ -29,3 +29,4 @@ COPY target /
 CMD ["/init.sh"]
 
 RUN echo 'memory_limit = 512M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini;
+RUN echo 'date.timezone = ${TZ}' >> /usr/local/etc/php/conf.d/docker-php-timezone.ini;
