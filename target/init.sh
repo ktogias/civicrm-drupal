@@ -86,16 +86,31 @@ if [ "${skip_cv}" = false ]; then
     composer config --working-dir=/opt/drupal --no-plugins allow-plugins.civicrm/composer-downloads-plugin true
     composer config --working-dir=/opt/drupal --no-plugins allow-plugins.civicrm/composer-compile-plugin true
     composer config --working-dir=/opt/drupal extra.compile-mode all
-    composer config --working-dir=/opt/drupal --json extra.civicrm-asset '{"assets:packages":{"+include":["kcfinder/**"]}}'
     composer require --working-dir=/opt/drupal --ignore-platform-req=ext-intl -n civicrm/civicrm-core "^5" civicrm/civicrm-packages "^5" civicrm/civicrm-drupal-8 "^5" civicrm/cli-tools "^2023"
     cd ..
     yes | vendor/bin/cv core:install --cms-base-url="${CMS_BASE_URL}" --db="mysql://${CIVICRM_DB_USER}:${CIVICRM_DB_PASSWORD}@db:3306/${CIVICRM_DB}" --lang="${CIVICRM_LANG}"
     chown -R www-data:www-data web/sites/default/files/
-    
-    #Properly setup kcfinder
-    sed -i '/RewriteRule .*autoload.* \[F\]/i \ \ RewriteCond %{REQUEST_URI} !/libraries/civicrm/packages/kcfinder.*\$' web/.htaccess
-    sed -i '/RewriteRule .*autoload.* \[F\]/i \ \ RewriteCond %{REQUEST_URI} !/libraries/civicrm/extern.*\$' web/.htaccess
-    ln -s /opt/drupal/web/sites/default/civicrm.settings.php /opt/drupal/web/libraries/civicrm/civicrm.config.php
+fi
+
+#Properly setup kcfinder
+HTACCESS_FILE="web/.htaccess"
+CIVICRM_SETTINGS_PATH="/opt/drupal/web/sites/default/civicrm.settings.php"
+CIVICRM_SETTINGS_LINK="/opt/drupal/web/libraries/civicrm/civicrm.config.php"
+if ! grep -q '"kcfinder/\*\*"' "/opt/drupal/composer.json"; then
+    echo "Configuring composer extra.civicrm-asset ..."
+    composer config --working-dir="/opt/drupal" --json extra.civicrm-asset '{"assets:packages":{"+include":["kcfinder/**"]}}'
+    composer civicrm:publish
+fi
+if ! grep -q "RewriteCond %{REQUEST_URI} \!/libraries/civicrm/packages/kcfinder\.\*\\$" "$HTACCESS_FILE"; then
+    echo "Adding kcfinder packages RewriteCond ..."
+    sed -i '/RewriteRule .*autoload.* \[F\]/i \ \ RewriteCond %{REQUEST_URI} !/libraries/civicrm/packages/kcfinder.*\$' "$HTACCESS_FILE"
+fi
+if ! grep -q "RewriteCond %{REQUEST_URI} \!/libraries/civicrm/extern\.\*\\$" "$HTACCESS_FILE"; then
+    echo "Adding extern RewriteCond ..."
+    sed -i '/RewriteRule .*autoload.* \[F\]/i \ \ RewriteCond %{REQUEST_URI} !/libraries/civicrm/extern.*\$' "$HTACCESS_FILE"
+fi
+if [ ! -L "$CIVICRM_SETTINGS_LINK" ]; then
+    ln -s "$CIVICRM_SETTINGS_PATH" "$CIVICRM_SETTINGS_LINK"
 fi
 
 # unset sensitive vars
