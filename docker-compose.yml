@@ -44,7 +44,7 @@ services:
         - ${DRUPAL_HOSTNAME}
 
   drupal:
-    image: ktogias/civicrm-drupal:drupal10-2
+    image: ktogias/civicrm-drupal:drupal10-3
     environment:
       DRUPAL_DB: ${DRUPAL_DB}
       DRUPAL_DB_USER: ${DRUPAL_DB_USER}
